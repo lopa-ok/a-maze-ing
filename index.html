@@ -8,10 +8,15 @@
 </head>
 <body>
     <div id="loadingOverlay" class="loading-overlay">
-
+        
     </div>
-    <canvas id="mazeCanvas"></canvas>
-    <div id="timer" class="timer">Time: 0</div>
+    <div class="game-container">
+        <canvas id="mazeCanvas"></canvas>
+        <div class="game-controls">
+            <div id="timer" class="timer">Time: 0</div>
+            <button id="giveUpButton" class="give-up-button">Give Up</button>
+        </div>
+    </div>
     <div id="menuOverlay" class="overlay">
         <div class="menu">
             <h2>Congratulations!</h2>

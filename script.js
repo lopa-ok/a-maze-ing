@@ -2,6 +2,10 @@ const canvas = document.getElementById('mazeCanvas');
 const ctx = canvas.getContext('2d');
 const timerElement = document.getElementById('timer');
 const finalTimeElement = document.getElementById('finalTime');
+const loadingOverlay = document.getElementById('loadingOverlay');
+const mainMenu = document.getElementById('mainMenu');
+const menuOverlay = document.getElementById('menuOverlay');
+const giveUpButton = document.getElementById('giveUpButton');
 
 let cols, rows, cellSize;
 let grid = [];
@@ -11,6 +15,7 @@ let player;
 let endCell;
 let timerInterval;
 let timeElapsed = 0;
+let gameInProgress = false; 
 
 class Cell {
     constructor(row, col) {
@@ -89,12 +94,12 @@ function setup() {
     endCell = grid[rows - 1][cols - 1];
 
     
-    const loadingOverlay = document.getElementById('loadingOverlay');
     loadingOverlay.style.display = 'none';
 
     
     canvas.style.display = 'block';
     timerElement.style.display = 'block';
+    giveUpButton.style.display = 'block'; 
 
     
     timeElapsed = 0;
@@ -107,6 +112,8 @@ function setup() {
 
     
     draw();
+
+    gameInProgress = true; 
 }
 
 function removeWalls(current, next) {
@@ -156,8 +163,8 @@ function draw() {
 }
 
 function startGame(difficulty) {
-    const mainMenu = document.getElementById('mainMenu');
     mainMenu.style.display = 'none';
+    menuOverlay.style.display = 'none'; 
 
     switch (difficulty) {
         case 'easy':
@@ -180,22 +187,26 @@ function startGame(difficulty) {
     canvas.width = cols * cellSize;
     canvas.height = rows * cellSize;
 
-    
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    loadingOverlay.style.display = 'flex';
-
     setup();
 }
 
 function restartGame() {
-    clearInterval(timerInterval); 
-    const menuOverlay = document.getElementById('menuOverlay');
     menuOverlay.style.display = 'none';
-    const mainMenu = document.getElementById('mainMenu');
     mainMenu.style.display = 'flex';
+    clearInterval(timerInterval); 
+    giveUpButton.style.display = 'none'; 
+    gameInProgress = false; 
 }
 
+giveUpButton.addEventListener('click', () => {
+    clearInterval(timerInterval);
+    menuOverlay.style.display = 'flex'; 
+    finalTimeElement.textContent = `Your time: ${timeElapsed} seconds`;
+});
+
 document.addEventListener('keydown', (e) => {
+    if (!gameInProgress) return; 
+
     let { row, col } = player.cell;
 
     switch (e.key) {
@@ -219,8 +230,7 @@ document.addEventListener('keydown', (e) => {
 
     if (player.cell === endCell) {
         clearInterval(timerInterval);
-        const menuOverlay = document.getElementById('menuOverlay');
-        menuOverlay.style.display = 'flex';
+        menuOverlay.style.display = 'flex'; 
         finalTimeElement.textContent = `Your time: ${timeElapsed} seconds`;
     }
 });
