@@ -1,17 +1,16 @@
 const canvas = document.getElementById('mazeCanvas');
 const ctx = canvas.getContext('2d');
+const timerElement = document.getElementById('timer');
+const finalTimeElement = document.getElementById('finalTime');
 
-const cols = 20;
-const rows = 20;
-const cellSize = 20;
-
-canvas.width = cols * cellSize;
-canvas.height = rows * cellSize;
-
+let cols, rows, cellSize;
 let grid = [];
 let stack = [];
-let startCell, endCell;
+let current;
 let player;
+let endCell;
+let timerInterval;
+let timeElapsed = 0;
 
 class Cell {
     constructor(row, col) {
@@ -19,43 +18,23 @@ class Cell {
         this.col = col;
         this.walls = [true, true, true, true]; 
         this.visited = false;
-        this.isStart = false;
-        this.isEnd = false;
-        this.hasPlayer = false; 
     }
 
     show() {
         const x = this.col * cellSize;
         const y = this.row * cellSize;
-        
+
         ctx.strokeStyle = '#000';
         ctx.lineWidth = 2;
-        
-        if (this.walls[0]) ctx.strokeRect(x, y, cellSize, 0);         
+
+        if (this.walls[0]) ctx.strokeRect(x, y, cellSize, 0); 
         if (this.walls[1]) ctx.strokeRect(x + cellSize, y, 0, cellSize); 
         if (this.walls[2]) ctx.strokeRect(x, y + cellSize, cellSize, 0); 
-        if (this.walls[3]) ctx.strokeRect(x, y, 0, cellSize);         
+        if (this.walls[3]) ctx.strokeRect(x, y, 0, cellSize); 
 
         if (this.visited) {
             ctx.fillStyle = '#FFF';
             ctx.fillRect(x, y, cellSize, cellSize);
-        }
-
-        if (this.isStart) {
-            ctx.fillStyle = 'green';
-            ctx.fillRect(x, y, cellSize, cellSize);
-        }
-
-        if (this.isEnd) {
-            ctx.fillStyle = 'red';
-            ctx.fillRect(x, y, cellSize, cellSize);
-        }
-
-        if (this.hasPlayer) {
-            ctx.fillStyle = 'blue';
-            ctx.beginPath();
-            ctx.arc(x + cellSize / 2, y + cellSize / 2, cellSize / 4, 0, Math.PI * 2);
-            ctx.fill();
         }
     }
 
@@ -78,105 +57,53 @@ class Cell {
     }
 }
 
-class Player {
-    constructor() {
-        this.row = 0; 
-        this.col = 0;
-        this.cell = grid[this.row][this.col];
-        this.cell.hasPlayer = true;
-    }
-
-    moveUp() {
-        if (this.row > 0 && !grid[this.row - 1][this.col].walls[2]) {
-            this.cell.hasPlayer = false;
-            this.row--;
-            this.cell = grid[this.row][this.col];
-            this.cell.hasPlayer = true;
-        }
-    }
-
-    moveRight() {
-        if (this.col < cols - 1 && !grid[this.row][this.col].walls[1]) {
-            this.cell.hasPlayer = false;
-            this.col++;
-            this.cell = grid[this.row][this.col];
-            this.cell.hasPlayer = true;
-        }
-    }
-
-    moveDown() {
-        if (this.row < rows - 1 && !grid[this.row][this.col].walls[2]) {
-            this.cell.hasPlayer = false;
-            this.row++;
-            this.cell = grid[this.row][this.col];
-            this.cell.hasPlayer = true;
-        }
-    }
-
-    moveLeft() {
-        if (this.col > 0 && !grid[this.row][this.col - 1].walls[1]) {
-            this.cell.hasPlayer = false;
-            this.col--;
-            this.cell = grid[this.row][this.col];
-            this.cell.hasPlayer = true;
-        }
-    }
-}
-
 function setup() {
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    loadingOverlay.style.display = 'flex'; 
+    grid = [];
+    stack = [];
+
+    for (let row = 0; row < rows; row++) {
+        grid[row] = [];
+        for (let col = 0; col < cols; col++) {
+            grid[row][col] = new Cell(row, col);
+        }
+    }
+    current = grid[0][0];
+    current.visited = true;
+    stack.push(current);
 
     
-    canvas.style.display = 'none';
-
-    setTimeout(() => {
-        for (let row = 0; row < rows; row++) {
-            grid[row] = [];
-            for (let col = 0; col < cols; col++) {
-                grid[row][col] = new Cell(row, col);
-            }
+    while (stack.length > 0) {
+        let next = current.checkNeighbors();
+        if (next) {
+            next.visited = true;
+            stack.push(next);
+            removeWalls(current, next);
+            current = next;
+        } else {
+            current = stack.pop();
         }
-
-        
-        startCell = grid[0][0];
-        startCell.isStart = true;
-        endCell = grid[rows - 1][cols - 1];
-        endCell.isEnd = true;
-
-        startCell.visited = true;
-        stack.push(startCell);
-
-        
-        player = new Player();
-
-        
-        document.addEventListener('keydown', handleKeyDown);
-
-        loadingOverlay.style.display = 'none'; 
-        canvas.style.display = 'block'; 
-
-        draw();
-    }, 1000); 
-}
-
-function handleKeyDown(event) {
-    switch (event.key) {
-        case 'w':
-            player.moveUp();
-            break;
-        case 'd':
-            player.moveRight();
-            break;
-        case 's':
-            player.moveDown();
-            break;
-        case 'a':
-            player.moveLeft();
-            break;
-        default:
-            return; 
     }
+
+    
+    player = { cell: grid[0][0] };
+    endCell = grid[rows - 1][cols - 1];
+
+    
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.style.display = 'none';
+
+    
+    canvas.style.display = 'block';
+    timerElement.style.display = 'block';
+
+    
+    timeElapsed = 0;
+    timerElement.textContent = `Time: ${timeElapsed}`;
+    clearInterval(timerInterval); 
+    timerInterval = setInterval(() => {
+        timeElapsed += 1;
+        timerElement.textContent = `Time: ${timeElapsed}`;
+    }, 1000);
 
     
     draw();
@@ -213,37 +140,87 @@ function draw() {
     }
 
     
-    if (player.cell === endCell) {
-        showMenu(); 
-        return; 
-    }
+    ctx.fillStyle = 'green';
+    ctx.fillRect(grid[0][0].col * cellSize + 5, grid[0][0].row * cellSize + 5, cellSize - 10, cellSize - 10);
 
-    let next = stack[stack.length - 1].checkNeighbors();
-    if (next) {
-        next.visited = true;
-        stack.push(next);
-        removeWalls(stack[stack.length - 2], next);
-    } else {
-        stack.pop();
-    }
+    
+    ctx.fillStyle = 'red';
+    ctx.fillRect(endCell.col * cellSize + 5, endCell.row * cellSize + 5, cellSize - 10, cellSize - 10);
+
+    
+    ctx.fillStyle = 'blue';
+    ctx.fillRect(player.cell.col * cellSize + 5, player.cell.row * cellSize + 5, cellSize - 10, cellSize - 10);
 
     
     requestAnimationFrame(draw);
 }
 
-function showMenu() {
-    const menuOverlay = document.getElementById('menuOverlay');
-    menuOverlay.style.display = 'flex'; 
+function startGame(difficulty) {
+    const mainMenu = document.getElementById('mainMenu');
+    mainMenu.style.display = 'none';
+
+    switch (difficulty) {
+        case 'easy':
+            cols = 10;
+            rows = 10;
+            cellSize = 40;
+            break;
+        case 'medium':
+            cols = 20;
+            rows = 20;
+            cellSize = 20;
+            break;
+        case 'hard':
+            cols = 30;
+            rows = 30;
+            cellSize = 15;
+            break;
+    }
+
+    canvas.width = cols * cellSize;
+    canvas.height = rows * cellSize;
+
+    
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.style.display = 'flex';
+
+    setup();
 }
 
 function restartGame() {
-    
-    stack = [];
-    setup();
-    draw();
-
+    clearInterval(timerInterval); 
     const menuOverlay = document.getElementById('menuOverlay');
-    menuOverlay.style.display = 'none'; 
+    menuOverlay.style.display = 'none';
+    const mainMenu = document.getElementById('mainMenu');
+    mainMenu.style.display = 'flex';
 }
 
-setup();
+document.addEventListener('keydown', (e) => {
+    let { row, col } = player.cell;
+
+    switch (e.key) {
+        case 'w':
+            if (!player.cell.walls[0]) row -= 1;
+            break;
+        case 'd':
+            if (!player.cell.walls[1]) col += 1;
+            break;
+        case 's':
+            if (!player.cell.walls[2]) row += 1;
+            break;
+        case 'a':
+            if (!player.cell.walls[3]) col -= 1;
+            break;
+    }
+
+    if (grid[row] && grid[row][col]) {
+        player.cell = grid[row][col];
+    }
+
+    if (player.cell === endCell) {
+        clearInterval(timerInterval);
+        const menuOverlay = document.getElementById('menuOverlay');
+        menuOverlay.style.display = 'flex';
+        finalTimeElement.textContent = `Your time: ${timeElapsed} seconds`;
+    }
+});

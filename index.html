@@ -4,24 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maze Game</title>
-    <link rel="stylesheet" href="style.css"> 
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="loadingOverlay" class="overlay">
-        <div class="loading-spinner"></div>
+    <div id="loadingOverlay" class="loading-overlay">
+
     </div>
-
     <canvas id="mazeCanvas"></canvas>
-
-
+    <div id="timer" class="timer">Time: 0</div>
     <div id="menuOverlay" class="overlay">
         <div class="menu">
             <h2>Congratulations!</h2>
             <p>You reached the end of the maze.</p>
+            <p id="finalTime"></p>
             <button onclick="restartGame()">Restart</button>
         </div>
     </div>
-
+    <div id="mainMenu" class="overlay">
+        <div class="menu">
+            <h2>Maze Game</h2>
+            <p>Select Difficulty</p>
+            <button onclick="startGame('easy')">Easy</button>
+            <button onclick="startGame('medium')">Medium</button>
+            <button onclick="startGame('hard')">Hard</button>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
