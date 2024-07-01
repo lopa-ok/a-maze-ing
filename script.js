@@ -11,6 +11,7 @@ canvas.height = rows * cellSize;
 let grid = [];
 let stack = [];
 let startCell, endCell;
+let player;
 
 class Cell {
     constructor(row, col) {
@@ -20,6 +21,7 @@ class Cell {
         this.visited = false;
         this.isStart = false;
         this.isEnd = false;
+        this.hasPlayer = false;
     }
 
     show() {
@@ -48,6 +50,13 @@ class Cell {
             ctx.fillStyle = 'red';
             ctx.fillRect(x, y, cellSize, cellSize);
         }
+
+        if (this.hasPlayer) {
+            ctx.fillStyle = 'blue';
+            ctx.beginPath();
+            ctx.arc(x + cellSize / 2, y + cellSize / 2, cellSize / 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
 
     checkNeighbors() {
@@ -69,6 +78,51 @@ class Cell {
     }
 }
 
+class Player {
+    constructor() {
+        this.row = 0;
+        this.col = 0;
+        this.cell = grid[this.row][this.col];
+        this.cell.hasPlayer = true;
+    }
+
+    moveUp() {
+        if (this.row > 0 && !grid[this.row - 1][this.col].walls[2]) {
+            this.cell.hasPlayer = false;
+            this.row--;
+            this.cell = grid[this.row][this.col];
+            this.cell.hasPlayer = true;
+        }
+    }
+
+    moveRight() {
+        if (this.col < cols - 1 && !grid[this.row][this.col].walls[1]) {
+            this.cell.hasPlayer = false;
+            this.col++;
+            this.cell = grid[this.row][this.col];
+            this.cell.hasPlayer = true;
+        }
+    }
+
+    moveDown() {
+        if (this.row < rows - 1 && !grid[this.row][this.col].walls[2]) {
+            this.cell.hasPlayer = false;
+            this.row++;
+            this.cell = grid[this.row][this.col];
+            this.cell.hasPlayer = true;
+        }
+    }
+
+    moveLeft() {
+        if (this.col > 0 && !grid[this.row][this.col - 1].walls[1]) {
+            this.cell.hasPlayer = false;
+            this.col--;
+            this.cell = grid[this.row][this.col];
+            this.cell.hasPlayer = true;
+        }
+    }
+}
+
 function setup() {
     for (let row = 0; row < rows; row++) {
         grid[row] = [];
@@ -77,7 +131,7 @@ function setup() {
         }
     }
 
-    // Set start and end points
+
     startCell = grid[0][0];
     startCell.isStart = true;
     endCell = grid[rows - 1][cols - 1];
@@ -85,6 +139,34 @@ function setup() {
 
     startCell.visited = true;
     stack.push(startCell);
+
+
+    player = new Player();
+
+
+    document.addEventListener('keydown', handleKeyDown);
+}
+
+function handleKeyDown(event) {
+    switch (event.key) {
+        case 'ArrowUp':
+            player.moveUp();
+            break;
+        case 'ArrowRight':
+            player.moveRight();
+            break;
+        case 'ArrowDown':
+            player.moveDown();
+            break;
+        case 'ArrowLeft':
+            player.moveLeft();
+            break;
+        default:
+            return;
+    }
+
+
+    draw();
 }
 
 function removeWalls(current, next) {
@@ -117,6 +199,12 @@ function draw() {
         }
     }
 
+
+    if (player.cell === endCell) {
+        alert('Congratulations! You reached the end of the maze.');
+        return;
+    }
+
     let next = stack[stack.length - 1].checkNeighbors();
     if (next) {
         next.visited = true;
@@ -126,9 +214,8 @@ function draw() {
         stack.pop();
     }
 
-    if (stack.length > 0) {
-        requestAnimationFrame(draw);
-    }
+
+    requestAnimationFrame(draw);
 }
 
 setup();
