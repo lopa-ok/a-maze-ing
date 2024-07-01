@@ -4,10 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maze Game</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
+    <div id="loadingOverlay" class="overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
     <canvas id="mazeCanvas"></canvas>
+
+
+    <div id="menuOverlay" class="overlay">
+        <div class="menu">
+            <h2>Congratulations!</h2>
+            <p>You reached the end of the maze.</p>
+            <button onclick="restartGame()">Restart</button>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>

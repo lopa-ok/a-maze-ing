@@ -21,7 +21,7 @@ class Cell {
         this.visited = false;
         this.isStart = false;
         this.isEnd = false;
-        this.hasPlayer = false;
+        this.hasPlayer = false; 
     }
 
     show() {
@@ -31,10 +31,10 @@ class Cell {
         ctx.strokeStyle = '#000';
         ctx.lineWidth = 2;
         
-        if (this.walls[0]) ctx.strokeRect(x, y, cellSize, 0);
-        if (this.walls[1]) ctx.strokeRect(x + cellSize, y, 0, cellSize);
-        if (this.walls[2]) ctx.strokeRect(x, y + cellSize, cellSize, 0);
-        if (this.walls[3]) ctx.strokeRect(x, y, 0, cellSize);
+        if (this.walls[0]) ctx.strokeRect(x, y, cellSize, 0);         
+        if (this.walls[1]) ctx.strokeRect(x + cellSize, y, 0, cellSize); 
+        if (this.walls[2]) ctx.strokeRect(x, y + cellSize, cellSize, 0); 
+        if (this.walls[3]) ctx.strokeRect(x, y, 0, cellSize);         
 
         if (this.visited) {
             ctx.fillStyle = '#FFF';
@@ -80,7 +80,7 @@ class Cell {
 
 class Player {
     constructor() {
-        this.row = 0;
+        this.row = 0; 
         this.col = 0;
         this.cell = grid[this.row][this.col];
         this.cell.hasPlayer = true;
@@ -124,48 +124,61 @@ class Player {
 }
 
 function setup() {
-    for (let row = 0; row < rows; row++) {
-        grid[row] = [];
-        for (let col = 0; col < cols; col++) {
-            grid[row][col] = new Cell(row, col);
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.style.display = 'flex'; 
+
+    
+    canvas.style.display = 'none';
+
+    setTimeout(() => {
+        for (let row = 0; row < rows; row++) {
+            grid[row] = [];
+            for (let col = 0; col < cols; col++) {
+                grid[row][col] = new Cell(row, col);
+            }
         }
-    }
 
+        
+        startCell = grid[0][0];
+        startCell.isStart = true;
+        endCell = grid[rows - 1][cols - 1];
+        endCell.isEnd = true;
 
-    startCell = grid[0][0];
-    startCell.isStart = true;
-    endCell = grid[rows - 1][cols - 1];
-    endCell.isEnd = true;
+        startCell.visited = true;
+        stack.push(startCell);
 
-    startCell.visited = true;
-    stack.push(startCell);
+        
+        player = new Player();
 
+        
+        document.addEventListener('keydown', handleKeyDown);
 
-    player = new Player();
+        loadingOverlay.style.display = 'none'; 
+        canvas.style.display = 'block'; 
 
-
-    document.addEventListener('keydown', handleKeyDown);
+        draw();
+    }, 1000); 
 }
 
 function handleKeyDown(event) {
     switch (event.key) {
-        case 'ArrowUp':
+        case 'w':
             player.moveUp();
             break;
-        case 'ArrowRight':
+        case 'd':
             player.moveRight();
             break;
-        case 'ArrowDown':
+        case 's':
             player.moveDown();
             break;
-        case 'ArrowLeft':
+        case 'a':
             player.moveLeft();
             break;
         default:
-            return;
+            return; 
     }
 
-
+    
     draw();
 }
 
@@ -199,10 +212,10 @@ function draw() {
         }
     }
 
-
+    
     if (player.cell === endCell) {
-        alert('Congratulations! You reached the end of the maze.');
-        return;
+        showMenu(); 
+        return; 
     }
 
     let next = stack[stack.length - 1].checkNeighbors();
@@ -214,9 +227,23 @@ function draw() {
         stack.pop();
     }
 
-
+    
     requestAnimationFrame(draw);
 }
 
+function showMenu() {
+    const menuOverlay = document.getElementById('menuOverlay');
+    menuOverlay.style.display = 'flex'; 
+}
+
+function restartGame() {
+    
+    stack = [];
+    setup();
+    draw();
+
+    const menuOverlay = document.getElementById('menuOverlay');
+    menuOverlay.style.display = 'none'; 
+}
+
 setup();
-draw();
