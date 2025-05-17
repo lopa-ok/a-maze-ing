@@ -6,6 +6,8 @@ const loadingOverlay = document.getElementById('loadingOverlay');
 const mainMenu = document.getElementById('mainMenu');
 const menuOverlay = document.getElementById('menuOverlay');
 const giveUpButton = document.getElementById('giveUpButton');
+const menuTitle = document.getElementById('menuTitle');
+const menuMessage = document.getElementById('menuMessage');
 
 let cols, rows, cellSize;
 let grid = [];
@@ -21,26 +23,39 @@ class Cell {
     constructor(row, col) {
         this.row = row;
         this.col = col;
-        this.walls = [true, true, true, true]; 
+        this.walls = [true, true, true, true];
         this.visited = false;
     }
 
     show() {
         const x = this.col * cellSize;
         const y = this.row * cellSize;
-
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2;
-
-        if (this.walls[0]) ctx.strokeRect(x, y, cellSize, 0); 
-        if (this.walls[1]) ctx.strokeRect(x + cellSize, y, 0, cellSize); 
-        if (this.walls[2]) ctx.strokeRect(x, y + cellSize, cellSize, 0); 
-        if (this.walls[3]) ctx.strokeRect(x, y, 0, cellSize); 
-
         if (this.visited) {
-            ctx.fillStyle = '#FFF';
+            ctx.fillStyle = '#fff';
             ctx.fillRect(x, y, cellSize, cellSize);
         }
+
+        ctx.strokeStyle = '#222';
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        if (this.walls[0]) { 
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + cellSize, y);
+        }
+        if (this.walls[1]) {
+            ctx.moveTo(x + cellSize, y);
+            ctx.lineTo(x + cellSize, y + cellSize);
+        }
+        if (this.walls[2]) {
+            ctx.moveTo(x + cellSize, y + cellSize);
+            ctx.lineTo(x, y + cellSize);
+        }
+        if (this.walls[3]) {
+            ctx.moveTo(x, y + cellSize);
+            ctx.lineTo(x, y);
+        }
+        ctx.stroke();
     }
 
     checkNeighbors() {
@@ -62,9 +77,17 @@ class Cell {
     }
 }
 
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
 function setup() {
     grid = [];
     stack = [];
+
+    loadingOverlay.style.display = 'flex';
 
     for (let row = 0; row < rows; row++) {
         grid[row] = [];
@@ -76,7 +99,6 @@ function setup() {
     current.visited = true;
     stack.push(current);
 
-    
     while (stack.length > 0) {
         let next = current.checkNeighbors();
         if (next) {
@@ -89,28 +111,23 @@ function setup() {
         }
     }
 
-    
     player = { cell: grid[0][0] };
     endCell = grid[rows - 1][cols - 1];
 
-    
     loadingOverlay.style.display = 'none';
 
-    
     canvas.style.display = 'block';
     timerElement.style.display = 'block';
     giveUpButton.style.display = 'block'; 
 
-    
     timeElapsed = 0;
-    timerElement.textContent = `Time: ${timeElapsed}`;
+    timerElement.textContent = `Time: ${formatTime(timeElapsed)}`;
     clearInterval(timerInterval); 
     timerInterval = setInterval(() => {
         timeElapsed += 1;
-        timerElement.textContent = `Time: ${timeElapsed}`;
+        timerElement.textContent = `Time: ${formatTime(timeElapsed)}`;
     }, 1000);
 
-    
     draw();
 
     gameInProgress = true; 
@@ -146,20 +163,21 @@ function draw() {
         }
     }
 
-    
-    ctx.fillStyle = 'green';
-    ctx.fillRect(grid[0][0].col * cellSize + 5, grid[0][0].row * cellSize + 5, cellSize - 10, cellSize - 10);
+    ctx.fillStyle = '#4caf50';
+    ctx.fillRect(grid[0][0].col * cellSize + 6, grid[0][0].row * cellSize + 6, cellSize - 12, cellSize - 12);
 
-    
-    ctx.fillStyle = 'red';
-    ctx.fillRect(endCell.col * cellSize + 5, endCell.row * cellSize + 5, cellSize - 10, cellSize - 10);
+    ctx.fillStyle = '#e53935';
+    ctx.fillRect(endCell.col * cellSize + 6, endCell.row * cellSize + 6, cellSize - 12, cellSize - 12);
 
-    
-    ctx.fillStyle = 'blue';
-    ctx.fillRect(player.cell.col * cellSize + 5, player.cell.row * cellSize + 5, cellSize - 10, cellSize - 10);
-
-    
-    requestAnimationFrame(draw);
+    ctx.fillStyle = '#1976d2';
+    ctx.beginPath();
+    ctx.arc(
+        player.cell.col * cellSize + cellSize / 2,
+        player.cell.row * cellSize + cellSize / 2,
+        (cellSize - 6) / 2, // increased from (cellSize - 14) / 2
+        0, 2 * Math.PI
+    );
+    ctx.fill();
 }
 
 function startGame(difficulty) {
@@ -168,19 +186,19 @@ function startGame(difficulty) {
 
     switch (difficulty) {
         case 'easy':
-            cols = 10;
-            rows = 10;
+            cols = 16;
+            rows = 16;
             cellSize = 40;
             break;
         case 'medium':
-            cols = 20;
-            rows = 20;
-            cellSize = 20;
+            cols = 28;
+            rows = 28;
+            cellSize = 24;
             break;
         case 'hard':
-            cols = 30;
-            rows = 30;
-            cellSize = 15;
+            cols = 40;
+            rows = 40;
+            cellSize = 16;
             break;
     }
 
@@ -195,42 +213,66 @@ function restartGame() {
     mainMenu.style.display = 'flex';
     clearInterval(timerInterval); 
     giveUpButton.style.display = 'none'; 
+    timerElement.style.display = 'none';
+    canvas.style.display = 'none';
     gameInProgress = false; 
 }
 
 giveUpButton.addEventListener('click', () => {
+    if (!gameInProgress) return;
     clearInterval(timerInterval);
     menuOverlay.style.display = 'flex'; 
-    finalTimeElement.textContent = `Your time: ${timeElapsed} seconds`;
+    menuTitle.textContent = "Game Over!";
+    menuMessage.textContent = "You gave up. Try again!";
+    finalTimeElement.textContent = `You gave up! Time: ${formatTime(timeElapsed)}`;
+    gameInProgress = false;
 });
 
 document.addEventListener('keydown', (e) => {
     if (!gameInProgress) return; 
 
     let { row, col } = player.cell;
+    let moved = false;
 
-    switch (e.key) {
+    switch (e.key.toLowerCase()) {
         case 'w':
-            if (!player.cell.walls[0]) row -= 1;
+        case 'arrowup':
+            if (!player.cell.walls[0]) { row -= 1; moved = true; }
             break;
         case 'd':
-            if (!player.cell.walls[1]) col += 1;
+        case 'arrowright':
+            if (!player.cell.walls[1]) { col += 1; moved = true; }
             break;
         case 's':
-            if (!player.cell.walls[2]) row += 1;
+        case 'arrowdown':
+            if (!player.cell.walls[2]) { row += 1; moved = true; }
             break;
         case 'a':
-            if (!player.cell.walls[3]) col -= 1;
+        case 'arrowleft':
+            if (!player.cell.walls[3]) { col -= 1; moved = true; }
             break;
     }
 
-    if (grid[row] && grid[row][col]) {
+    if (moved && grid[row] && grid[row][col]) {
         player.cell = grid[row][col];
+        draw();
     }
 
     if (player.cell === endCell) {
         clearInterval(timerInterval);
         menuOverlay.style.display = 'flex'; 
-        finalTimeElement.textContent = `Your time: ${timeElapsed} seconds`;
+        menuTitle.textContent = "Congratulations!";
+        menuMessage.textContent = "You reached the end of the maze.";
+        finalTimeElement.textContent = `Your time: ${formatTime(timeElapsed)}`;
+        gameInProgress = false;
     }
 });
+
+window.onload = () => {
+    menuOverlay.style.display = 'none';
+    loadingOverlay.style.display = 'none';
+    canvas.style.display = 'none';
+    timerElement.style.display = 'none';
+    giveUpButton.style.display = 'none';
+    mainMenu.style.display = 'flex';
+};

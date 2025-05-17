@@ -4,91 +4,435 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #f0f0f0;
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    letter-spacing: 0.01em;
 }
 
 canvas {
-    display: none;
-    border: 1px solid black;
+    display: block;
+    border: 2px solid #222;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.15), 0 1.5px 4px rgba(0,0,0,0.08);
+    background: #fff;
+    margin: 0 auto;
+    transition: box-shadow 0.3s;
+    max-width: 90vw;
+    max-height: 80vh;
 }
 
 .timer {
     display: none;
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    font-size: 20px;
+    font-size: 22px;
+    font-weight: 700;
     background-color: #fff;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    color: #222;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    letter-spacing: 0.03em;
+    margin: 0 12px 0 0;
 }
 
 .give-up-button {
-    position: fixed;
-    top: 20px;
-    left: calc(20px + 100px + 10px); 
-    width: 100px;
-    font-size: 20px;
+    width: 120px;
+    font-size: 18px;
+    font-weight: 500;
     background-color: #dc3545;
     color: #fff;
     border: none;
-    border-radius: 5px;
-    padding: 10px;
+    border-radius: 8px;
+    padding: 12px 0;
     text-align: center;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background 0.2s, box-shadow 0.2s;
     display: none;
+    box-shadow: 0 2px 8px rgba(220,53,69,0.15);
+    margin: 0 0 0 12px;
 }
 
 .give-up-button:hover {
     background-color: #c82333;
+    box-shadow: 0 4px 16px rgba(220,53,69,0.25);
 }
-
 
 .overlay {
     display: none;
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1;
-    display: flex;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(30, 30, 30, 0.55);
+    z-index: 100;
     justify-content: center;
     align-items: center;
+    backdrop-filter: blur(3px);
 }
 
 .menu {
-    background-color: #fff;
-    width: 300px;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    background: rgba(255,255,255,0.97);
+    width: 340px;
+    padding: 36px 28px 28px 28px;
+    border-radius: 14px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.18);
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .menu h2 {
     margin-top: 0;
-    color: #333;
+    color: #222;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
 }
 
 .menu p {
-    color: #666;
+    color: #444;
+    font-size: 1.1rem;
+    margin: 10px 0 0 0;
 }
 
 .menu button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: #fff;
+    margin-top: 18px;
+    padding: 12px 0;
+    width: 100%;
+    background: linear-gradient(90deg, #ffb347 60%, #ffcc33 100%);
+    color: #4a3200;
     border: none;
-    border-radius: 4px;
+    border-radius: 0.5em;
+    font-size: 1.1rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+    box-shadow: 0 2px 8px rgba(255, 204, 51, 0.10);
+    outline: none;
 }
 
 .menu button:hover {
-    background-color: #0056b3;
+    background: linear-gradient(90deg, #ffcc33 60%, #ffb347 100%);
+    color: #7a5300;
+    box-shadow: 0 4px 16px rgba(255, 204, 51, 0.18);
+}
+
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(255,255,255,0.7);
+    z-index: 200;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: #007bff;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.game-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.custom-github-btn {
+    position: fixed;
+    left: 32px;
+    bottom: 32px;
+    z-index: 300;
+    display: flex;
+    overflow: hidden;
+    align-items: center;
+    text-decoration: none;
+    text-align: left;
+    font-size: 1rem;
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-weight: 500;
+    background: #000;
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    border-radius: 8px;
+    padding: 0;
+    min-width: 0;
+    max-width: 150px;
+    height: 44px;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    cursor: pointer;
+}
+
+.custom-github-btn:hover {
+    background: #222;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.28);
+    transform: translateY(-2px) scale(1.04);
+}
+
+.custom-github-btn > span {
+    position: absolute;
+    right: 0;
+    margin-top: -48px;
+    height: 128px;
+    width: 32px;
+    transform: translateX(48px) rotate(12deg);
+    background: #fff;
+    opacity: 0.10;
+    transition: all 1s cubic-bezier(0.4,0,0.2,1);
+    pointer-events: none;
+}
+
+.custom-github-btn:hover > span {
+    transform: translateX(-160px) rotate(12deg);
+}
+
+.custom-github-btn .flex {
+    display: flex;
+    align-items: center;
+    padding-left: 18px;
+    padding-right: 8px;
+    gap: 8px;
+}
+
+.custom-github-btn .ml-1 {
+    margin-left: 4px;
+}
+
+.custom-github-btn .ml-2 {
+    margin-left: 8px;
+}
+
+.custom-github-btn .w-4 {
+    width: 18px;
+    height: 18px;
+}
+
+.custom-github-btn .text-white {
+    color: #fff;
+}
+
+.custom-github-btn .text-gray-500 {
+    color: #aaa;
+}
+
+.custom-github-btn .star-icon {
+    color: #aaa;
+    transition: color 0.3s;
+}
+
+.custom-github-btn:hover .star-icon {
+    color: #ffd600;
+}
+
+.maze-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.maze-svg {
+    position: absolute;
+    opacity: 0.18;
+    filter: blur(0.5px);
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.maze-svg-1 {
+    top: 10%;
+    left: 8%;
+    width: 160px;
+    height: 160px;
+    transform: rotate(-8deg);
+}
+.maze-svg-2 {
+    bottom: 12%;
+    right: 10%;
+    width: 140px;
+    height: 140px;
+    transform: rotate(7deg);
+}
+.maze-svg-3 {
+    top: 55%;
+    left: 60%;
+    width: 120px;
+    height: 120px;
+    transform: rotate(-12deg);
+}
+.maze-svg-4 {
+    bottom: 20%;
+    left: 18%;
+    width: 100px;
+    height: 100px;
+    transform: rotate(14deg);
+}
+.maze-svg-anim {
+    top: 30%;
+    right: 22%;
+    width: 120px;
+    height: 120px;
+    animation: maze-rotate 8s linear infinite alternate;
+    transform-origin: 60px 60px;
+}
+
+@keyframes maze-rotate {
+    0% { transform: rotate(0deg) scale(1); opacity: 0.18; }
+    50% { transform: rotate(8deg) scale(1.05); opacity: 0.22; }
+    100% { transform: rotate(-8deg) scale(1); opacity: 0.18; }
+}
+
+#mainMenu .menu {
+    position: relative;
+    z-index: 1;
+}
+
+@media (max-width: 600px) {
+    .custom-github-btn {
+        left: 8px;
+        bottom: 8px;
+        max-width: 90vw;
+        height: 40px;
+        font-size: 0.95rem;
+    }
+    .custom-github-btn .flex {
+        padding-left: 10px;
+        padding-right: 4px;
+    }
+    .custom-instagram-btn {
+        left: 8px;
+        bottom: 56px;
+        max-width: 90vw;
+        height: 40px;
+        font-size: 0.95rem;
+    }
+    .custom-instagram-btn .flex {
+        padding-left: 10px;
+        padding-right: 4px;
+    }
+}
+
+html {
+  --s: 194px;
+  --c1: #ede7f6;
+  --c2: #d1c4e9;
+  --c3: #b39ddb;
+
+  --_l:#0000 calc(25%/3),var(--c1) 0 25%,#0000 0;
+  --_g:conic-gradient(from 120deg at 50% 87.5%,var(--c1) 120deg,#0000 0);
+  background:
+    var(--_g),var(--_g) 0 calc(var(--s)/2),
+    conic-gradient(from 180deg at 75%,var(--c2) 60deg,#0000 0),
+    conic-gradient(from 60deg at 75% 75%,var(--c1) 0 60deg,#0000 0),
+    linear-gradient(150deg,var(--_l)) 0 calc(var(--s)/2),
+    conic-gradient(at 25% 25%,#0000 50%,var(--c2) 0 240deg,var(--c1) 0 300deg,var(--c2) 0),
+    linear-gradient(-150deg,var(--_l)) var(--c3);
+  background-size: calc(0.866*var(--s)) var(--s);
+}
+
+.game-controls-bottom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 24px;
+    width: 100%;
+    gap: 16px;
+}
+
+.custom-instagram-btn {
+    position: fixed;
+    left: 32px;
+    bottom: 88px;
+    z-index: 300;
+    display: flex;
+    overflow: hidden;
+    align-items: center;
+    text-decoration: none;
+    text-align: left;
+    font-size: 1rem;
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-weight: 500;
+    background: linear-gradient(90deg, #fd5949 0%, #d6249f 60%, #285AEB 100%);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(253,89,73,0.18);
+    border-radius: 8px;
+    padding: 0;
+    min-width: 0;
+    max-width: 180px;
+    height: 44px;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    cursor: pointer;
+}
+
+.custom-instagram-btn:hover {
+    background: linear-gradient(90deg, #285AEB 0%, #fd5949 100%);
+    box-shadow: 0 4px 24px rgba(253,89,73,0.28);
+    transform: translateY(-2px) scale(1.04);
+}
+
+.custom-instagram-btn > span {
+    position: absolute;
+    right: 0;
+    margin-top: -48px;
+    height: 128px;
+    width: 32px;
+    transform: translateX(48px) rotate(12deg);
+    background: #fff;
+    opacity: 0.10;
+    transition: all 1s cubic-bezier(0.4,0,0.2,1);
+    pointer-events: none;
+}
+
+.custom-instagram-btn:hover > span {
+    transform: translateX(-160px) rotate(12deg);
+}
+
+.custom-instagram-btn .flex {
+    display: flex;
+    align-items: center;
+    padding-left: 18px;
+    padding-right: 8px;
+    gap: 8px;
+}
+
+.custom-instagram-btn .ml-1 {
+    margin-left: 4px;
+}
+
+.custom-instagram-btn .w-4 {
+    width: 24px;
+    height: 24px;
+}
+
+.custom-instagram-btn .text-white {
+    color: #fff;
+}
+
+.custom-instagram-btn .bi-instagram {
+    transition: color 0.3s;
+}
+
+@media (max-width: 600px) {
+    .custom-instagram-btn {
+        left: 8px;
+        bottom: 56px;
+        max-width: 90vw;
+        height: 40px;
+        font-size: 0.95rem;
+    }
+    .custom-instagram-btn .flex {
+        padding-left: 10px;
+        padding-right: 4px;
+    }
+}
+
+.custom-github-btn,
+.custom-instagram-btn {
+    width: 150px;
+    min-width: 150px;
+    max-width: 150px;
 }
